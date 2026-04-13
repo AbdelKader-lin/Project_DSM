@@ -1,77 +1,52 @@
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 public class Message {
+    
+    MessageType messageType;
+    int senderID;
+    int targetID;
+    int address;
+    int value;
 
-    private MessageType messageType;
-    private int senderID;
-    private int targetID;
-    private long address;
-    private String payload;
-
-    public Message( int senderID , int targetID , long address , String payload , MessageType type ) {
-        this.messageType = type ;
-        this.senderID = senderID ;
-        this.targetID = targetID ;
-        this.address = address ;
-        this.payload = ( payload == null ) ? "" : payload ;
+    Message(int senderID, int targetID, int address, int value, MessageType m) {
+        this.messageType = m;
+        this.senderID = senderID;
+        this.targetID = targetID;
+        this.address = address;
+        this.value = value;
     }
 
     public int get_SenderID() {
-        return this.senderID ;
+        return this.senderID;
     }
 
     public int get_TargetID() {
-        return this.targetID ;
+        return this.targetID;
     }
 
-    public long get_Address() {
-        return this.address ;
+    public int get_Address() {
+        return this.address;
+    }
+
+    public int get_Value() {
+        return this.value;
     }
 
     public MessageType get_MessageType() {
-        return this.messageType ;
-    }
-
-    public String get_Payload() {
-        return this.payload ;
-    }
-
-    public byte[] get_PayloadBytes() {
-        if ( this.payload.isEmpty() ) {
-            return null ;
-        }
-        return Base64.getDecoder().decode( this.payload ) ;
-    }
-
-    public static String bytesToPayload( byte[] data ) {
-        if ( data == null ) {
-            return "" ;
-        }
-        return Base64.getEncoder().encodeToString( data ) ;
-    }
-
-    public static String stringToPayload( String s ) {
-        if ( s == null ) {
-            return "" ;
-        }
-        return bytesToPayload( s.getBytes( StandardCharsets.UTF_8 ) ) ;
+        return this.messageType;
     }
 
     public String MessageToString() {
-        // Keep the simple "type:sender:target:address:payload" format from your friend's code.
-        return this.messageType + ":" + this.senderID + ":" + this.targetID + ":" + this.address + ":" + this.payload;
+        return this.messageType + ":" + this.senderID + ":" + this.targetID + ":" + this.address + ":" + this.value;
     }
 
-    public static Message StringToMessage( String s ) {
-        String[] parts = s.split( ":" , 5 ) ;
+    public static Message StringToMessage(String s) {
+        String[] parts = s.split(":");
 
-        MessageType type = MessageType.valueOf( parts[ 0 ] ) ;
-        int senderID = Integer.parseInt( parts[ 1 ] ) ;
-        int targetID = Integer.parseInt( parts[ 2 ] ) ;
-        long address = Long.parseLong( parts[ 3 ] ) ;
-        String payload = ( parts.length >= 5 ) ? parts[ 4 ] : "" ;
+        MessageType type = MessageType.valueOf(parts[0]);
+        int senderID = Integer.parseInt(parts[1]);
+        int targetID = Integer.parseInt(parts[2]);
+        int address = Integer.parseInt(parts[3]);
+        int value = Integer.parseInt(parts[4]);
 
-        return new Message( senderID , targetID , address , payload , type ) ;
+        return new Message(senderID, targetID, address, value, type);
     }
 }

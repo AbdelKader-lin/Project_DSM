@@ -96,9 +96,4 @@ public class DSM_implem implements DSM_itf {
         return false ;
     }
 
-    // Used by Node when storing raw bytes received over the network.
-    void writeRaw( long address , byte[] data ) {
-        this.get_Mem().put( address , data ) ;
-    }
-
 }

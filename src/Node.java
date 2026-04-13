@@ -4,7 +4,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Scanner;
 
 
@@ -49,6 +48,17 @@ public class Node {
         return ( int )( address % NUM_STRIPES );
     }
 
+    public void initializeMemory(int totalAddresses) {
+        for (int address = 0; address < totalAddresses; address++) {
+            if (getOwner(address) == ID) {
+                int stripe = getStripe(address);
+                synchronized (locks[stripe]) {
+                dsm.write(address, address * 10); // nice visible default values for tests :))
+            } // kim : no lock needed here, there wont be concurrency in init. but for the sake of being clear, i put it. 
+        }}
+    }
+
+
     // Command to send : channel.basicPublish("", QUEUE_NAME, null, message.getBytes(StandardCharsets.UTF_8));
     // Command to receive : channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
 
@@ -86,29 +96,30 @@ public class Node {
         DeliverCallback deliverCallback = ( consumerTag , delivery ) -> {
 
             // Decode raw bytes into your Message object.
-            String msgB = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            Message msg = Message.StringToMessage(msgB);
+            String msgB = new String( delivery.getBody() , StandardCharsets.UTF_8 ) ;
+            Message msg = Message.StringToMessage( msgB ) ;
 
             // Extract message fields.
             MessageType mType = msg.get_MessageType();
             int senderID = msg.get_SenderID();
             int targetID = msg.get_TargetID();
-            long address = msg.get_Address();
-            String payload = msg.get_Payload();
+            int address = msg.get_Address();
+            int value = msg.get_Value();
 
             // ignore messages not for this node
             if (targetID != node.get_ID()) {
                 return;
             }
             // read messages logic : read request -> read local memory -> send response
-            if (mType == MessageType.READ) {
-                int stripe = node.getStripe(address);
-                byte[] localValue;
-                synchronized (node.locks[stripe]) {
+            if ( mType == MessageType.READ ) {
+                int stripe = node.getStripe( address ) ;
+                int localValue ;
+                synchronized ( node.locks[ stripe ] ) {
 
                 System.out.println("Thread " + Thread.currentThread().getName()+ " got lock of stripe " + stripe + " adr " + address);
 
-                localValue = node.localMemory.getOrDefault(address, 0);
+                byte[] raw = node.dsm.read(address);
+                localValue = (raw != null) ? Integer.parseInt(new String(raw, StandardCharsets.UTF_8)) : 0;
 
                 try { Thread.sleep(3000); } catch (Exception e) {} // sleep 3 sec to see if actually works :||
                 System.out.println("Thread " + Thread.currentThread().getName() +" released lock of stripe " + stripe + " adr " + address);}
@@ -127,17 +138,17 @@ public class Node {
             }
 
             // write logic remote write request -> write local memory -> send response
-            else if (mType == MessageType.WRITE) {
-                System.out.println("Node " + node.get_ID() +" : WRITE request from node " + senderID +" for address " + address + " value = " + value);
+            else if ( mType == MessageType.WRITE ) {
+                System.out.println( "Node " + node.get_ID() +" : WRITE request from node " + senderID +" for address " + address + " value = " + value ) ;
 
                 // int stripe = node.getStripe(address);
                 // synchronized (node.locks[stripe]) {
                 //     node.localMemory.put(address, value);
                 // }
-                int stripe = node.getStripe(address);
+                int stripe = node.getStripe( address );
                 System.out.println("Thread " + Thread.currentThread().getName()+ " asks for lock stripe " + stripe + " addr " + address);
                 synchronized (node.locks[stripe]) {
-                    node.dsm.get_Mem().put(address, data);
+                    node.dsm.write(address, value);
                 }
 
                 Message response = new Message(
@@ -186,7 +197,8 @@ public class Node {
                     synchronized (node.locks[stripe]) {
                     System.out.println("Thread " + Thread.currentThread().getName()+ " got lock of stripe " + stripe + " adr " + address);
 
-                    localValue = node.localMemory.getOrDefault(address, 0);
+                    byte[] raw = node.dsm.read(address);
+                    localValue = (raw != null) ? Integer.parseInt(new String(raw, StandardCharsets.UTF_8)) : 0;
                     try { Thread.sleep(1000); } catch (Exception e) {}
 
                     System.out.println("Thread " + Thread.currentThread().getName() + " released lock of stripe " + stripe + " adr " + address);
@@ -224,14 +236,14 @@ public class Node {
                     synchronized (node.locks[stripe]) {
                         System.out.println("Thread " + Thread.currentThread().getName() + " got lock of stripe " + stripe + " adr " + address);
 
-                        node.localMemory.put(address, value);
+                        node.dsm.write(address, value);
                         try { Thread.sleep(1000); } catch (Exception e) {}
 
                         System.out.println("Thread " + Thread.currentThread().getName()+ " released lock of stripe " + stripe + " addr " + address);
                     }
                     System.out.println("Node " + node.get_ID() + " : LOCAL WRITE address " + address + " = " + value);
                 } else {
-                    Message writeMsg = new Message( 
+                    Message writeMsg = new Message(
                             node.get_ID(),
                             owner,
                             address,
