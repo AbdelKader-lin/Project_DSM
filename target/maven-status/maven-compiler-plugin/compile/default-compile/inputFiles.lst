@@ -1,3 +1,8 @@
-/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/server/NodeStorage.java
-/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/server/Node.java
-/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/common/DSMMessage.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/util/Log.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/service/Node.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/model/Message.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/exception/MemoryAccessException.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/service/MemoryStorage.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/model/MessageType.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/service/MessageService.java
+/home/viktoriia/code/ids/Project_DSM/src/main/java/dsm/Main.java

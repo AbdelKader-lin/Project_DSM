@@ -1,3 +1,9 @@
-dsm/server/NodeStorage.class
-main/java/dsm/common/DSMMessage.class
-dsm/server/Node.class
+dsm/model/MessageType.class
+dsm/Main.class
+dsm/exception/MemoryAccessException.class
+dsm/model/Message.class
+dsm/util/Log.class
+dsm/service/Node$1.class
+dsm/service/MessageService.class
+dsm/service/Node.class
+dsm/service/MemoryStorage.class
