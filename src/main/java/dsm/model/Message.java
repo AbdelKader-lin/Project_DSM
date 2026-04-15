@@ -1,8 +1,17 @@
 package dsm.model;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Message implements Serializable {
+
+public class Message {
+
+    public enum MessageType {
+        READ_REQUEST,
+        READ_RESPONSE,
+        WRITE_REQUEST,
+        WRITE_RESPONSE
+    }
 
     private final MessageType type;
     private final int senderId;
@@ -10,15 +19,31 @@ public class Message implements Serializable {
     private final int address;
     private final Integer value;
     private final long requestId;
+    private final String errorMessage;
 
     public Message(int senderId, int targetId, int address, Integer value, MessageType type, long requestId) {
+        this(senderId, targetId, address, value, type, requestId, "");
+    }
+    @JsonCreator
+    public Message(
+            @JsonProperty("senderId") int senderId,
+            @JsonProperty("targetId") int targetId,
+            @JsonProperty("address") int address,
+            @JsonProperty("value") Integer value,
+            @JsonProperty("type") MessageType type,
+            @JsonProperty("requestId") Long requestId,
+            @JsonProperty("errorMessage") String errorMessage
+    ) {
         this.senderId = senderId;
         this.targetId = targetId;
         this.address = address;
         this.value = value;
         this.type = type;
         this.requestId = requestId;
+        this.errorMessage = errorMessage;
+
     }
+
     public MessageType getType() {
         return type;
     }
@@ -36,5 +61,9 @@ public class Message implements Serializable {
     }
     public long getRequestId() {
         return requestId;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

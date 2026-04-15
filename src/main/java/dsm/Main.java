@@ -1,5 +1,6 @@
 package dsm;
 
+import dsm.exception.DSMException;
 import dsm.service.MessageService;
 import dsm.service.Node;
 
@@ -29,12 +30,25 @@ public class Main {
             switch (input[0]) {
 
                 case "r" -> {
+                    if (input.length < 2) {
+                        System.out.println("Usage: r <address> ");
+                        break;
+                    }
                     int addr = Integer.parseInt(input[1]);
-                    int res = node.read(addr);
-                    System.out.println("Read result: " + res);
+                    try {
+                        int res = node.read(addr);
+                        System.out.println("Read result: " + res);
+                    } catch (DSMException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
 
                 case "ra" -> {
+
+                    if (input.length < 2) {
+                        System.out.println("Usage: ra <address> ");
+                        break;
+                    }
                     int addr = Integer.parseInt(input[1]);
 
                     node.readAsync(addr).thenAccept(val ->
@@ -42,14 +56,26 @@ public class Main {
                 }
 
                 case "w" -> {
+                    if (input.length < 3) {
+                        System.out.println("Usage: w <address> <value>");
+                        break;
+                    }
                     int addr = Integer.parseInt(input[1]);
                     int val = Integer.parseInt(input[2]);
 
-                    node.write(addr, val);
-                    System.out.println("Write done!");
+                    try {
+                        node.write(addr, val);
+                        System.out.println("Write done!");
+                    } catch (DSMException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
 
                 case "wa" -> {
+                    if (input.length < 3) {
+                        System.out.println("Usage: wa <address> <value>");
+                        break;
+                    }
                     int addr = Integer.parseInt(input[1]);
                     int val = Integer.parseInt(input[2]);
 
