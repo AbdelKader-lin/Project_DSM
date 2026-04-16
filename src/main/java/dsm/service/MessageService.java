@@ -33,7 +33,6 @@ public class MessageService {
 
         DeliverCallback callback = (tag, delivery) -> {
             try {
-                System.out.println("RAW MESSAGE RECEIVED");
                 Message msg = objectMapper.readValue(delivery.getBody(), Message.class);
                 Log.info(nodeId, "RECV " + msg.getType() + "...");
                 handler.accept(msg);
@@ -45,7 +44,7 @@ public class MessageService {
 
         consumeChannel.basicConsume(queue, true, callback, tag -> {});
 
-        System.out.println("Node " + nodeId + " is now consuming the queue " + queue);
+        Log.info(nodeId,"Started listening to the queue " + queue);
     }
 
     public void send(int fromNode, Message message) throws IOException {
